@@ -6,9 +6,23 @@ pipeline {
     stage('3984565a-OP-S1') {
       steps {
         sh '''
+          // Create backup image of UAT server
           docker rmi -f uatsvr_image:latest
           docker commit 3984565a_uatsvr uatsvr_image:latest
-          // TODO: requirement 3
+          
+          // Run script in UAT server to install apache2 and update index.html
+          puppet resource package git ensure=present
+          puppet resource file /tmp/3984565a/research ensure=absent force=true
+          puppet resource file /tmp/3984565a ensure=absent force=true
+          puppet resource file /tmp/3984565a ensure=directory
+          puppet resource file /tmp/3984565a/research ensure=directory
+          cd /tmp/3984565a/research
+          git clone https://github.com/HelloRave/3984565a_op_repo.git
+
+          target=3984565a_uatsvr.localdomain
+          locate_script='/tmp/3984565a/research/3984565a_op_repo/3984565a_script'
+          bolt script run $locate_script -t $target -u clientadm -p user123 --no-host-key-check --run-as root
+          
           echo '3984565a_OP_S1: uat web server is backup and updated'
         '''
       }
@@ -58,9 +72,16 @@ pipeline {
     stage('3984565a-OP-S6') {
       steps {
         sh '''
+          // Create backup image of Prod server
           docker rmi -f prodsvr_image:latest
           docker commit 3984565a_prodsvr prodsvr_image:latest
-          // TODO: requirement 3
+          
+          // TODO: check current working directory
+          pwd
+          target=3984565a_prodsvr.localdomain
+          locate_script='/tmp/3984565a/research/3984565a_op_repo/3984565a_script'
+          bolt script run $locate_script -t $target -u clientadm -p user123 --no-host-key-check --run-as root
+
           echo '3984565a_OP_S6: prod web server is backup and updated'
         '''
       }
