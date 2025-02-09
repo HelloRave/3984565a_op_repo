@@ -1,1 +1,95 @@
-pipeline {}
+pipeline {
+
+  agent any
+
+  stages {
+    stage('3984565a-OP-S1') {
+      steps {
+        sh '''
+          docker rmi -f uatsvr_image:latest
+          docker commit 3984565a_uatsvr uatsvr_image:latest
+          // TODO: requirement 3
+          echo '3984565a_OP_S1: uat web server is backup and updated'
+        '''
+      }
+    }
+
+    stage('3984565a-OP-S2') {
+      steps {
+        sh '''
+          curl –Is http://localhost:32500|head –n 1  > /tmp/uatsvr-result-file
+        '''
+        def result = sh(script: 'cat /tmp/uatsvr-result-file', returnStdout: true).trim()
+        echo "Result: ${result}"
+        if (result ==~ /HTTP\/1.1  200 OK/) {
+          echo '3984565a_OP_S2: uat svr is running'
+        } else {
+          echo '3984565a_OP_S2: uat svr fails'
+        }
+      }
+    }
+
+    stage('3984565a-OP-S3') {
+      steps {
+        echo '3984565a_OP_S3: Proceed stress test uat web server?'
+        input(
+          message: 'Proceed with stress test on uat web server or Abort (for uat svr fails)?',
+          ok: 'Proceed with stress test on uat web server'
+        )
+      }
+    }
+
+    stage('3984565a-OP-S4') {
+      steps {
+        echo '3984565a_OP_S4: Stress test result is good'
+      }
+    }
+
+    stage('3984565a-OP-S5') {
+      steps {
+        echo '3984565a_OP_S5: Deploy new update to prod web server?'
+        input(
+          message: 'Proceed to update prod web server or Abort (for stress test fails)?',
+          ok: 'Proceed to update prod web server'
+        )
+      }
+    }
+
+    stage('3984565a-OP-S6') {
+      steps {
+        sh '''
+          docker rmi -f prodsvr_image:latest
+          docker commit 3984565a_prodsvr prodsvr_image:latest
+          // TODO: requirement 3
+          echo '3984565a_OP_S6: prod web server is backup and updated'
+        '''
+      }
+    }
+
+    stage('3984565a-OP-S7') {
+      steps {
+        sh '''
+          curl –Is http://localhost:32600|head –n 1  > /tmp/prodsvr-result-file
+        '''
+        def result = sh(script: 'cat /tmp/prodsvr-result-file', returnStdout: true).trim()
+        echo "Result: ${result}"
+        if (result ==~ /HTTP\/1.1  200 OK/) {
+          echo '3984565a_OP_S7: Production website is operational'
+        } else {
+          def action = input(
+            message: 'Action',
+            parameters: [
+              choice(name: '', choices: ['Trigger roll back',  'Troubleshooting'])
+            ]
+          )
+          if (action == 'Trigger roll back') {
+            echo '3984565a_OP-S7: Production website is rolling back'
+          } else {
+            echo '3984565a_OP-S7: Troubleshooting of Production website is in progress'
+          }
+        }
+      }
+    }
+  }
+
+}
