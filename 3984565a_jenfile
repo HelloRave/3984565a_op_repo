@@ -48,7 +48,9 @@ pipeline {
         echo '3984565a_OP_S3: Proceed stress test uat web server?'
         input(
           message: 'Proceed with stress test on uat web server or Abort (for uat svr fails)?',
-          ok: 'Proceed with stress test on uat web server'
+          ok: 'Proceed with stress test on uat web server',
+          submitter: 'jadmin',
+          submitterParameter: 'jadmin'
         )
       }
     }
@@ -64,7 +66,9 @@ pipeline {
         echo '3984565a_OP_S5: Deploy new update to prod web server?'
         input(
           message: 'Proceed to update prod web server or Abort (for stress test fails)?',
-          ok: 'Proceed to update prod web server'
+          ok: 'Proceed to update prod web server',
+          submitter: 'jadmin',
+          submitterParameter: 'jadmin'
         )
       }
     }
