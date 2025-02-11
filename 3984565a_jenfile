@@ -33,7 +33,7 @@ pipeline {
         '''
         script {
           def result = sh(script: 'cat /tmp/uatsvr-result-file', returnStdout: true).trim()
-          if (result == 'HTTP/1.1  200 OK') {
+          if (result ==~ /HTTP\/1\.1\s+200\s+OK/) {
             echo '3984565a_OP_S2: uat svr is running'
           } else {
             echo '3984565a_OP_S2: uat svr fails'
@@ -94,7 +94,7 @@ pipeline {
         '''
         script {
           def result = sh(script: 'cat /tmp/prodsvr-result-file', returnStdout: true).trim()
-          if (result == 'HTTP/1.1  200 OK') {
+          if (result ==~ /HTTP\/1\.1\s+200\s+OK/) {
             echo '3984565a_OP_S7: Production website is operational'
           } else {
             def action = input(
