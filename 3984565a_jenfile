@@ -94,21 +94,23 @@ pipeline {
         sh '''
           curl –Is http://localhost:32600|head –n 1  > /tmp/prodsvr-result-file
         '''
-        def result = sh(script: 'cat /tmp/prodsvr-result-file', returnStdout: true).trim()
-        echo "Result: ${result}"
-        if (result ==~ /HTTP\/1.1  200 OK/) {
-          echo '3984565a_OP_S7: Production website is operational'
-        } else {
-          def action = input(
-            message: 'Action',
-            parameters: [
-              choice(name: '', choices: ['Trigger roll back',  'Troubleshooting'])
-            ]
-          )
-          if (action == 'Trigger roll back') {
-            echo '3984565a_OP-S7: Production website is rolling back'
+        script {
+          def result = sh(script: 'cat /tmp/prodsvr-result-file', returnStdout: true).trim()
+          echo "Result: ${result}"
+          if (result ==~ /HTTP\/1.1  200 OK/) {
+            echo '3984565a_OP_S7: Production website is operational'
           } else {
-            echo '3984565a_OP-S7: Troubleshooting of Production website is in progress'
+            def action = input(
+              message: 'Action',
+              parameters: [
+                choice(name: '', choices: ['Trigger roll back',  'Troubleshooting'])
+              ]
+            )
+            if (action == 'Trigger roll back') {
+              echo '3984565a_OP-S7: Production website is rolling back'
+            } else {
+              echo '3984565a_OP-S7: Troubleshooting of Production website is in progress'
+            }
           }
         }
       }
