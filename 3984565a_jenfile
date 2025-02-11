@@ -6,11 +6,9 @@ pipeline {
     stage('3984565a-OP-S1') {
       steps {
         sh '''
-          // Create backup image of UAT server
           docker rmi -f uatsvr_image:latest
           docker commit 3984565a_uatsvr uatsvr_image:latest
           
-          // Run script in UAT server to install apache2 and update index.html
           puppet resource package git ensure=present
           puppet resource file /tmp/3984565a/research ensure=absent force=true
           puppet resource file /tmp/3984565a ensure=absent force=true
@@ -74,11 +72,9 @@ pipeline {
     stage('3984565a-OP-S6') {
       steps {
         sh '''
-          // Create backup image of Prod server
           docker rmi -f prodsvr_image:latest
           docker commit 3984565a_prodsvr prodsvr_image:latest
-          
-          // TODO: check current working directory
+
           pwd
           target=3984565a_prodsvr.localdomain
           locate_script='/tmp/3984565a/research/3984565a_op_repo/3984565a_script'
