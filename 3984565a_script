@@ -11,4 +11,3 @@ puppet resource file /tmp/3984565a/research ensure=directory
 cd /tmp/3984565a/research
 git clone https://github.com/HelloRave/3984565a_op_repo.git
 cp -p /tmp/3984565a/research/3984565a_op_repo/3984565a_index.html /var/www/html
-mv -f /var/www/html/3984565a_index.html /var/www/html/index.html

@@ -29,7 +29,7 @@ pipeline {
     stage('3984565a-OP-S2') {
       steps {
         sh '''
-          curl –Is http://localhost:32500|head –n 1  > /tmp/uatsvr-result-file
+          curl –Is http://localhost:32500 | head –n 1  > /tmp/uatsvr-result-file
         '''
         script {
           def result = sh(script: 'cat /tmp/uatsvr-result-file', returnStdout: true).trim()
@@ -88,7 +88,7 @@ pipeline {
     stage('3984565a-OP-S7') {
       steps {
         sh '''
-          curl –Is http://localhost:32600|head –n 1  > /tmp/prodsvr-result-file
+          curl –Is http://localhost:32600 | head –n 1  > /tmp/prodsvr-result-file
         '''
         script {
           def result = sh(script: 'cat /tmp/prodsvr-result-file', returnStdout: true).trim()
