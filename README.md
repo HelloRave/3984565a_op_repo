@@ -21,21 +21,10 @@ sudo vi /etc/hosts
 docker network create --subnet=192.168.120.0/24 customnetwork
 ```
 
-3. Create Container
+3. Create custom image
 ```
-#UAT Container
-docker run -dit --network customnetwork --privileged -h 3984565a_uatsvr.localdomain \
-  --name 3984565a_uatsvr --add-host=sddo-vm:172.20.113.194  --ip=192.168.120.130 \
-  -p 32500:80 ubuntu:18.04 /bin/bash
+docker run -it --name puppetclient ubuntu:18.04 /bin/bash
 
-#Prod Container
-docker run -dit --network customnetwork --privileged -h 3984565a_prodsvr.localdomain \
-  --name 3984565a_prodsvr --add-host=sddo-vm:172.20.113.194  --ip=192.168.120.140 \
-  -p 32600:80 ubuntu:18.04 /bin/bash
-```
-
-4. Install useful packages and puppet client in containers
-```
 apt-get update
 apt-get install curl wget vim iputils-ping net-tools openssh-server
 wget https://apt.puppetlabs.com/puppet7-release-bionic.deb
@@ -43,6 +32,21 @@ dpkg -i puppet7-release-bionic.deb
 vi /etc/apt/sources.list.d/puppet7-release.list #TODO: change http to https
 apt-get update
 apt-get install puppet-agent
+
+docker commit puppetclient puppetclient-image
+```
+
+4. Create Container
+```
+#UAT Container
+docker run -dit --network customnetwork --privileged -h 3984565a_uatsvr.localdomain \
+  --name 3984565a_uatsvr --add-host=sddo-vm:172.20.113.194  --ip=192.168.120.130 \
+  -p 32500:80 puppetclient-image /sbin/init
+
+#Prod Container
+docker run -dit --network customnetwork --privileged -h 3984565a_prodsvr.localdomain \
+  --name 3984565a_prodsvr --add-host=sddo-vm:172.20.113.194  --ip=192.168.120.140 \
+  -p 32600:80 puppetclient-image /bin/bash
 ```
 
 5. Configure container's host file
@@ -65,11 +69,11 @@ vim /etc/puppetlabs/puppet/puppet.conf
 ```
 #TODO: UAT
 certname = 3984565a_uatsvr.localdomain
-server = sddo-vm
+server = sddo-vm.localdomain
 
 #TODO: Prod
 certname = 3984565a_prodsvr.localdomain
-server = sddo-vm
+server = sddo-vm.localdomain
 ```
 
 7. Register puppet agent with puppet master
